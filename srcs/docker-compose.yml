@@ -6,7 +6,7 @@ services:
     build:
       context: requirements/nginx
       args:
-        - DOMAIN_NAME=${DOMAIN_NAME}
+        - domain_name=${DOMAIN_NAME}
     restart: always
     networks:
       - inception
@@ -20,7 +20,14 @@ services:
     container_name: mariadb
     image: mariadb
     pull_policy: never
-    build: requirements/mariadb
+    build:
+      context: requirements/mariadb
+      args:
+        - mysql_database=${MYSQL_DATABASE}
+        - mysql_user=${MYSQL_USER}
+      secrets:
+        - mysql_root_password
+        - mysql_password
     restart: always
     networks:
       - inception
@@ -59,3 +66,9 @@ volumes:
       type: none
       device: ${HOME}/data/db
       o: bind
+
+secrets:
+  mysql_root_password:
+    environment: MYSQL_ROOT_PASSWORD
+  mysql_password:
+    environment: MYSQL_PASSWORD
