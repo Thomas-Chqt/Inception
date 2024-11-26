@@ -5,8 +5,8 @@ services:
     pull_policy: never
     build:
       context: requirements/nginx
-      args:
-        - domain_name=${DOMAIN_NAME}
+      secrets:
+        - inception_secrets
     restart: always
     networks:
       - inception
@@ -14,7 +14,6 @@ services:
       - 443:443
     volumes:
       - wordpress:/var/www/wordpress
-    env_file: .env
   
   mariadb:
     container_name: mariadb
@@ -22,30 +21,27 @@ services:
     pull_policy: never
     build:
       context: requirements/mariadb
-      args:
-        - mysql_database=${MYSQL_DATABASE}
-        - mysql_user=${MYSQL_USER}
       secrets:
-        - mysql_root_password
-        - mysql_password
+        - inception_secrets
     restart: always
     networks:
       - inception
     volumes:
       - db:/var/lib/mysql
-    env_file: .env
 
-  # wordpress:
-  #   container_name: wordpress
-  #   image: wordpress
-  #   pull_policy: never
-  #   build: requirements/wordpress
-  #   restart: always
-  #   networks:
-  #     - inception
-  #   volumes:
-  #     - wordpress:/var/www/wordpress
-  #   env_file: .env
+  wordpress:
+    container_name: wordpress
+    image: wordpress
+    pull_policy: never
+    build:
+      context: requirements/wordpress
+      secrets:
+        - inception_secrets
+    restart: always
+    networks:
+      - inception
+    volumes:
+      - wordpress:/var/www/wordpress
 
 networks:
   inception:
@@ -68,7 +64,5 @@ volumes:
       o: bind
 
 secrets:
-  mysql_root_password:
-    environment: MYSQL_ROOT_PASSWORD
-  mysql_password:
-    environment: MYSQL_PASSWORD
+  inception_secrets:
+    file: .env

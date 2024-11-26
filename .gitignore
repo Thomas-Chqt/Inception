@@ -2,3 +2,4 @@
 .env
 srcs/requirements/nginx/*.crt
 eval.webarchive
+data
