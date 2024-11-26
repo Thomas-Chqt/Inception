@@ -22,11 +22,23 @@ down:
 clean:
 	-docker builder prune -a -f
 
-fclean: down clean
+rmdata:
+	@if docker volume inspect wordpress >/dev/null 2>/dev/null && docker volume inspect db >/dev/null 2>/dev/null; then \
+		echo "run --rm -it -v wordpress:/wp -v db:/db debian bash -c 'rm -rf /wp/* /db/*'"; \
+		docker run --rm -it -v wordpress:/wp -v db:/db debian bash -c 'rm -rf /wp/* /db/*'; \
+	elif docker volume inspect wordpress >/dev/null 2>/dev/null; then \
+		echo "run --rm -it -v wordpress:/wp debian bash -c 'rm -rf /wp/*'"; \
+		docker run --rm -it -v wordpress:/wp debian bash -c 'rm -rf /wp/*'; \
+	elif docker volume inspect db >/dev/null 2>/dev/null; then \
+		echo "run --rm -it -v db:/db debian bash -c 'rm -rf /db/*'"; \
+		docker run --rm -it -v db:/db debian bash -c 'rm -rf /db/*'; \
+    fi
+
+fclean: down clean rmdata
 	-docker volume rm wordpress
 	-docker volume rm db
-	-docker image rm nginx
-	-docker image rm mariadb
+	-docker image rm -f nginx
+	-docker image rm -f mariadb
 	-rm -rf ${DATA_DIR}
 
 re: fclean all

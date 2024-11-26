@@ -9,3 +9,4 @@ COPY setup.sh /setup.sh
 RUN --mount=type=secret,id=inception_secrets chmod +x /setup.sh && /setup.sh && rm /setup.sh
 
 ENTRYPOINT [ "mariadbd-safe", "--defaults-file=/etc/mysql/mariadb.cnf" ]
+# ENTRYPOINT [ "tail", "-f" ]

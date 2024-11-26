@@ -7,8 +7,13 @@ openssl req -x509 -nodes \
     -keyout /etc/ssl/private/${DOMAIN_NAME}.key \
     -subj "/C=JP/ST=TYO/L=Tokyo/O=42/OU=42/CN=${DOMAIN_NAME}"
 apt remove -y openssl
-chown -R www-data:www-data /etc/ssl/private
-chown -R www-data:www-data /var/log/nginx
-chown -R www-data:www-data /var/lib/nginx
+chmod 755 /etc/ssl/private
 touch /run/nginx.pid
-chown -R www-data:www-data /run/nginx.pid
+mkdir -p /var/cache/nginx
+chown -R nginx:www-data                 \
+    /etc/ssl/certs/${DOMAIN_NAME}.crt   \
+    /etc/ssl/private/${DOMAIN_NAME}.key \
+    /var/log/nginx                      \
+    /var/lib/nginx                      \
+    /run/nginx.pid                      \
+    /var/cache/nginx

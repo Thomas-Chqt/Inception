@@ -42,7 +42,7 @@ services:
       - inception
     volumes:
       - wordpress:/var/www/wordpress
-
+  
 networks:
   inception:
     name: inception
