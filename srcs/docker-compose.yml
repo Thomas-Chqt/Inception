@@ -42,6 +42,8 @@ services:
       - inception
     volumes:
       - wordpress:/var/www/wordpress
+    depends_on:
+      - mariadb
   
 networks:
   inception:

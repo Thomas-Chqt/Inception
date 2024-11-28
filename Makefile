@@ -39,6 +39,7 @@ fclean: down clean rmdata
 	-docker volume rm db
 	-docker image rm -f nginx
 	-docker image rm -f mariadb
+	-docker image rm -f wordpress
 	-rm -rf ${DATA_DIR}
 
 re: fclean all

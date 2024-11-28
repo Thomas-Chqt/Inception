@@ -2,35 +2,43 @@
 
 export $(grep -v '^#' /run/secrets/* | xargs)
 
-apt install -y wget
+WP_CONFIG_SAMPLE=/var/www/wordpress/wp-config-sample.php
+WP_CONFIG=/var/www/wordpress/wp-config.php
 
-wget -P /var/www https://wordpress.org/latest.tar.gz
-tar -xzvf /var/www/latest.tar.gz -C /var/www
-rm /var/www/latest.tar.gz
+sed -n '1,50p' $WP_CONFIG_SAMPLE > $WP_CONFIG
+wget -qO- https://api.wordpress.org/secret-key/1.1/salt/ >> $WP_CONFIG
+sed -n '59,$p' $WP_CONFIG_SAMPLE >> $WP_CONFIG
+
+sed -i "s/database_name_here/${MYSQL_DATABASE}/" $WP_CONFIG
+sed -i "s/username_here/${MYSQL_USER}/" $WP_CONFIG
+sed -i "s/password_here/${MYSQL_PASSWORD}/" $WP_CONFIG
+sed -i "s/localhost/mariadb/" $WP_CONFIG
+
+# debug
+# sed -i "s/define( 'WP_DEBUG', false );/define( 'WP_DEBUG', true );/" $WP_CONFIG
+#end debug
+
+wget /usr/local/bin https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+chmod +x wp-cli.phar
+mv wp-cli.phar /usr/local/bin/wp
+
+chmod 600 $WP_CONFIG
+
+echo "wp core install \\
+    --path=/var/www/wordpress \\
+    --url=${DOMAIN_NAME} \\
+    --title=Inception \\
+    --admin_user=${WP_ADMIN_USER} \\
+    --admin_password=${WP_ADMIN_PW} \\
+    --admin_email=${WP_ADMIN_MAIL} \\
+    --skip-email
+php-fpm7.4 -F" > /entrypoint.sh
 
 touch /run/php7.4-fpm.pid
 mkdir -p /var/log/php
 
-CONF=/var/www/wordpress/wp-config-sample.php
-{ sed -n '1,50p' $CONF; wget -qO- https://api.wordpress.org/secret-key/1.1/salt/; sed -n '59,$p' $CONF; } > /tmp/conf.tmp
-mv /tmp/conf.tmp $CONF
-sed -i "s/database_name_here/${MYSQL_DATABASE}/" $CONF
-sed -i "s/username_here/${MYSQL_USER}/" $CONF
-sed -i "s/password_here/${MYSQL_PASSWORD}/" $CONF
-sed -i "s/localhost/mariadb:3360/" $CONF
-
-# debug
-sed -i "s/define( 'WP_DEBUG', false );/define( 'WP_DEBUG', true );/" $CONF
-{ sed -n '1,91p' $CONF; echo "define( 'WP_DEBUG_LOG', true );"; sed -n '93,$p' $CONF; } > /tmp/conf.tmp
-mv /tmp/conf.tmp $CONF
-#end debug
-
-mv $CONF /var/www/wordpress/wp-config.php 
-chmod 600 /var/www/wordpress/wp-config.php 
-
-chown -R php-fpm:www-data \
-    /var/log/php          \
-    /run/php7.4-fpm.pid   \
-    /var/www/wordpress
-    
-apt remove -y wget
+chown -R php-fpm:inception \
+    /var/log/php           \
+    /run/php7.4-fpm.pid    \
+    /var/www/wordpress     \
+    /entrypoint.sh
