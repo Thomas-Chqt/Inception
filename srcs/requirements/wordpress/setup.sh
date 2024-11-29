@@ -24,15 +24,18 @@ mv wp-cli.phar /usr/local/bin/wp
 
 chmod 600 $WP_CONFIG
 
-echo "wp core install \\
-    --path=/var/www/wordpress \\
-    --url=${DOMAIN_NAME} \\
-    --title=Inception \\
-    --admin_user=${WP_ADMIN_USER} \\
-    --admin_password=${WP_ADMIN_PW} \\
-    --admin_email=${WP_ADMIN_MAIL} \\
-    --skip-email
-php-fpm7.4 -F" > /entrypoint.sh
+echo "#!/bin/sh
+if ! wp core is-installed --path=/var/www/wordpress ; then
+    wp core install \\
+        --path=/var/www/wordpress \\
+        --url=${DOMAIN_NAME} \\
+        --title=Inception \\
+        --admin_user=${WP_ADMIN_USER} \\
+        --admin_password=${WP_ADMIN_PW} \\
+        --admin_email=${WP_ADMIN_MAIL} \\
+        --skip-email
+fi" > /usr/local/bin/wp-install
+chmod 700 /usr/local/bin/wp-install
 
 touch /run/php7.4-fpm.pid
 mkdir -p /var/log/php
@@ -41,4 +44,4 @@ chown -R php-fpm:inception \
     /var/log/php           \
     /run/php7.4-fpm.pid    \
     /var/www/wordpress     \
-    /entrypoint.sh
+    /usr/local/bin/wp-install
