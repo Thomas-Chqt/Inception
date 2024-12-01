@@ -9,7 +9,8 @@ services:
         - inception_secrets
     restart: always
     networks:
-      - inception
+      inception:
+        # ipv4_address: 172.20.0.3
     ports:
       - 443:443
     volumes:
@@ -44,10 +45,23 @@ services:
       - wordpress:/var/www/wordpress
     depends_on:
       - mariadb
-  
+
+  # firefox:
+  #   container_name: firefox
+  #   image: jlesage/firefox
+  #   networks:
+  #     - inception
+  #   ports:
+  #     - 5800:5800
+  #   extra_hosts:
+  #     - tchoquet.42.fr:172.20.0.3
+    
 networks:
   inception:
     name: inception
+    # ipam:
+    #   config:
+    #     - subnet: 172.20.0.0/24
 
 volumes:
   wordpress:
