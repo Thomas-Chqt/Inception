@@ -34,6 +34,12 @@ if ! wp core is-installed --path=/var/www/wordpress ; then
         --admin_password=${WP_ADMIN_PW} \\
         --admin_email=${WP_ADMIN_MAIL} \\
         --skip-email
+    wp user create \\
+        --path=/var/www/wordpress \\
+        --role=author \\
+        --user_pass=${WP_AUTHOR_PW} \\
+        ${WP_AUTHOR_USER} \\
+        ${WP_AUTHOR_MAIL}
 fi" > /usr/local/bin/wp-install
 chmod 700 /usr/local/bin/wp-install
 
